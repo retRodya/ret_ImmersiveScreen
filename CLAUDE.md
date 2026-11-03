@@ -2,17 +2,21 @@
 
 World of Warcraft addon for Retail and Forever: one key hides the interface and all names
 and adds Letterbox bars. Read `docs/VISION.md` before proposing or building features:
-it defines the scope of the next version and records decisions.
+it defines the scope of the next version and records decisions. `docs/ROADMAP.md`
+shows where the project stands and what comes next.
 
 ## Repository layout
 
 - `ret_ImmersiveScreen/` — the addon exactly as it ships. Only game files go here.
 - `docs/` — planning and development documents.
+- The previous, deprecated addon is https://github.com/retRodya/ret_Cinemator.
+  Mine it for knowledge (API quirks, past bugs), not for code.
 - `CHANGELOG.md` — user-visible changes, Keep a Changelog format.
 
 ## Language
 
-- Talk to the user in Russian.
+- Talk to the user in Russian. The user is learning to run a project: briefly
+  explain the reasoning behind process and architecture choices.
 - Code, comments, addon UI text, commit messages, CHANGELOG and README are English.
 - Documents in `docs/` are Russian.
 
