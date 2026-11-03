@@ -1,0 +1,11 @@
+# Store text with LF in the repository; Git converts on checkout as needed.
+* text=auto eol=lf
+
+# Game assets are binary.
+*.blp binary
+*.tga binary
+*.png binary
+*.jpg binary
+*.ogg binary
+*.mp3 binary
+*.ttf binary
