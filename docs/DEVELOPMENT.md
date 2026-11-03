@@ -8,24 +8,30 @@
 Тогда правка файла в репозитории сразу видна в игре после `/reload`, и копировать
 ничего не нужно. Права администратора для junction не требуются.
 
-PowerShell, путь к игре замени на свой:
+PowerShell из корня репозитория, путь к игре замени на свой:
 
 ```powershell
-$addon = "D:\Hobby\WoW_addons\ret_ImmersiveScreen_project_opus\ret_ImmersiveScreen"
-$wow = "D:\Games\World of Warcraft"
+$addon = (Resolve-Path .\ret_ImmersiveScreen).Path
+$wow = "D:\Games\Battle.net\World of Warcraft"
 New-Item -ItemType Junction -Path "$wow\_retail_\Interface\AddOns\ret_ImmersiveScreen" -Target $addon
 New-Item -ItemType Junction -Path "$wow\_forever_\Interface\AddOns\ret_ImmersiveScreen" -Target $addon
 ```
 
 Если в `AddOns` уже есть папка `ret_ImmersiveScreen`, сначала убери её.
-Junction работает только на одном компьютере. Если игра стоит на другом,
-клонируй туда репозиторий и создай связи там.
+Junction работает только на одном компьютере. На новом компьютере клонируй
+или перенеси репозиторий и создай связи заново.
 
-Удаление связи не трогает файлы репозитория:
+Проверить связь: `Get-Item <путь> | Select-Object LinkType, Target`.
+
+Связь — не копия. Файлы, удалённые *внутри* неё, удаляются из репозитория.
+Удалять нужно саму связь, и только так:
 
 ```powershell
-Remove-Item "$wow\_retail_\Interface\AddOns\ret_ImmersiveScreen"
+cmd /c rmdir "$wow\_retail_\Interface\AddOns\ret_ImmersiveScreen"
 ```
+
+`rmdir` без `/s` удаляет только связь. `Remove-Item` в Windows PowerShell 5.1
+может предложить удалить и содержимое — для связей его не используй.
 
 ## Проверка в игре
 
@@ -36,3 +42,21 @@ Remove-Item "$wow\_retail_\Interface\AddOns\ret_ImmersiveScreen"
   перезапуска клиента.
 - Версия интерфейса клиента: `/dump select(4, GetBuildInfo())`. Если число
   не совпадает со строкой `## Interface` в `.toc`, обнови её.
+
+## Проверка перед релизом
+
+Каждый день аддон работает через связь. Перед релизом его ставят так,
+как получит игрок, — из архива. Так видно, что в архив попали все файлы
+из `.toc` и не попало лишнее. Как собирать архив, решим на первом релизе.
+
+1. Собери архив релиза.
+2. Удали связь в обоих клиентах (`cmd /c rmdir`, см. выше).
+3. Распакуй архив в `Interface\AddOns` каждого клиента.
+4. Пройди чек-лист релиза в Retail и Forever.
+5. Проверь чистую установку: при закрытой игре перенеси файл аддона из
+   `WTF\Account\<аккаунт>\SavedVariables` в другую папку, зайди в игру,
+   проверь, выйди и верни файл на место.
+6. Удали распакованные папки и создай связи заново.
+
+Настройки аддона хранятся в `WTF`, а не в папке аддона, поэтому замена
+связи на копию и обратно их не трогает.
