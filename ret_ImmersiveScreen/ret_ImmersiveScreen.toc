@@ -1,0 +1,9 @@
+## Interface: 120105, 120100, 16001
+## Title: |cff9acd32ret_|r|cff40c7ebImmersiveScreen|r
+## Notes: One key for a clean cinematic frame: hides the interface and all names, and adds Letterbox bars.
+## Author: retRodya
+## Version: 0.1.0-dev
+## Category: UI
+## IconTexture: 1029587
+
+Core.lua
