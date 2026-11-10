@@ -3,7 +3,8 @@
 World of Warcraft addon for Retail and Forever: one key hides the interface and all names
 and adds Letterbox bars. Read `docs/VISION.md` before proposing or building features:
 it defines the scope of the next version and records decisions. `docs/ROADMAP.md`
-shows where the project stands and what comes next.
+shows where the project stands and what comes next. `docs/ARCHITECTURE.md`
+describes the core and how to add an effect or a page.
 
 ## Repository layout
 

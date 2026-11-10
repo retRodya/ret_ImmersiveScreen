@@ -17,6 +17,8 @@ Copy the `ret_ImmersiveScreen` folder into your client's `Interface/AddOns` fold
 - Retail: `_retail_/Interface/AddOns/ret_ImmersiveScreen/`
 - Forever: `_forever_/Interface/AddOns/ret_ImmersiveScreen/`
 
-## Commands
+## Settings
 
-- `/retis` or `/retimmersivescreen` — show the addon version.
+Open the settings window with `/retis` or `/retimmersivescreen`, from the Addon
+Compartment, or from the addon's page in Settings > AddOns. Assign keys on the
+Lens page or in the game's Key Bindings under ret_ImmersiveScreen.

@@ -1,0 +1,11 @@
+<Bindings>
+    <Binding name="RETIMMERSIVESCREEN_COMBINEDLENS" header="RETIMMERSIVESCREEN" category="BINDING_HEADER_RETIMMERSIVESCREEN">
+        RetImmersiveScreen_OnBinding("CombinedLens")
+    </Binding>
+    <Binding name="RETIMMERSIVESCREEN_HIDEUI" category="BINDING_HEADER_RETIMMERSIVESCREEN">
+        RetImmersiveScreen_OnBinding("HideUI")
+    </Binding>
+    <Binding name="RETIMMERSIVESCREEN_LETTERBOX" category="BINDING_HEADER_RETIMMERSIVESCREEN">
+        RetImmersiveScreen_OnBinding("Letterbox")
+    </Binding>
+</Bindings>

@@ -5,5 +5,22 @@
 ## Version: 0.1.0-dev
 ## Category: UI
 ## IconTexture: 1029587
+## SavedVariables: ret_ImmersiveScreenDB
+## AddonCompartmentFunc: RetImmersiveScreen_OnAddonCompartmentClick
 
+# core
 Core.lua
+Widgets.lua
+Window.lua
+Lens.lua
+EntryPoints.lua
+
+# the window's list, in this order
+Pages\General.lua
+Effects\HideUI.lua
+Effects\Letterbox.lua
+Effects\CameraShift.lua
+Effects\FOV.lua
+Pages\Lens.lua
+LiteRP\GoOffline.lua
+LiteRP\GoOnline.lua

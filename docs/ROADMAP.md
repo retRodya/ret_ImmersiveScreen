@@ -8,16 +8,25 @@
 - [x] **1. Идея и границы** — `docs/VISION.md`.
 - [ ] **2. Каркас репозитория** — папка аддона, `CLAUDE.md`, `CHANGELOG.md`,
   `docs/DEVELOPMENT.md`.
-  - [ ] Подключить аддон к Retail и Forever (junction, см. `docs/DEVELOPMENT.md`)
-    и проверить, что `/retis` печатает версию.
+  - [x] Подключить аддон к Retail и Forever (junction, см. `docs/DEVELOPMENT.md`).
+  - [x] Проверить в игре, что аддон загружается и `/retis` открывает окно (Forever).
   - [ ] Сверить `## Interface` в `.toc` с `/dump select(4, GetBuildInfo())`
     в каждом клиенте.
 - [ ] **3. Бэклог в GitHub Issues** — метки `bug`, `feature`, `idea`,
   `needs-ingame-test`; milestone `v0.1.0`; задачи из VISION.md.
   Для работы из Claude нужен GitHub CLI (`gh`).
 - [ ] **4. Архитектура ядра** — модули эффектов, события, SavedVariables
-  с версией схемы и миграциями.
-- [ ] **5. Первая функция целиком** — код, проверка в игре, тег, релиз.
+  с версией схемы и миграциями. Описание — `docs/ARCHITECTURE.md`.
+  - [x] Окно настроек как в ret_TweaksLite: General, Effects, Lens, LiteRP,
+    заглушки CameraShift, FOV, GoOffline, GoOnline.
+  - [x] Реестр модулей и страниц, настройки с откатом, схема SavedVariables.
+  - [x] Клавиши эффектов и Combined Lens, General → Hide screenshot message.
+  - [x] Проверка окна и клавиш в Forever.
+  - [ ] Проверка окна в Retail.
+- [ ] **5. Эффекты 0.1.0** — по одному, с проверкой в игре после каждого:
+  - [ ] HideUI: скрытие интерфейса и имён, возврат CVar после выхода и вылета.
+  - [ ] Letterbox: полосы, высота, анимация.
+- [ ] **6. Первый релиз** — чек-лист, тег, архив (см. `docs/DEVELOPMENT.md`).
   Дальше по той же схеме: одна функция — одна ветка и PR — запись в CHANGELOG.
 
 ## Инструменты (по мере надобности)
