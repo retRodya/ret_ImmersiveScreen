@@ -28,4 +28,6 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   animation duration, on its own key.
 - FOV smoothly changes the camera's field of view and returns it to yours, with
   adjustable angle and animation duration, on its own key.
-- GoOffline and GoOnline are shown as previews of later versions.
+- GoOffline closes the Letterbox bars in during the logout countdown, in three
+  adjustable stages; cancelling the logout brings them back.
+- GoOnline is shown as a preview of a later version.

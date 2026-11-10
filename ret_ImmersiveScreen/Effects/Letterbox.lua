@@ -60,14 +60,14 @@ end
 
 -- A change in the middle of an animation continues from where the bars are now.
 -- The full Animation duration is the way from no bars to Bar height; a shorter
--- way takes proportionally less time.
-local function MoveTo(height)
+-- way takes proportionally less time. seconds, optional, sets the time instead.
+local function MoveTo(height, seconds)
     if not bars then
         CreateBars()
     end
     start, target, elapsed = current, height, 0
-    local span = ns.GetSetting(KEY, "height")
-    duration = ns.GetSetting(KEY, "duration") * math.abs(target - start) / span
+    duration = seconds
+        or ns.GetSetting(KEY, "duration") * math.abs(target - start) / ns.GetSetting(KEY, "height")
     if duration <= 0 then
         Finish()
         return
@@ -77,6 +77,39 @@ local function MoveTo(height)
 end
 
 local active = false
+local held = false -- LiteRP holds the bars, e.g. GoOffline during the logout countdown
+
+-- What the Lens wants: Bar height while Letterbox is on, otherwise no bars.
+local function LensHeight()
+    return active and ns.GetSetting(KEY, "height") or 0
+end
+
+-- For LiteRP features. A mechanism only: it works even while the Letterbox
+-- effect is disabled, and creates the bar frame on first use.
+ns.Letterbox = {}
+
+function ns.Letterbox.GetHeight()
+    return current
+end
+
+-- Sets the bars to a height at once, every call, until Release. The Lens keeps
+-- track of Letterbox meanwhile without moving the bars.
+function ns.Letterbox.Hold(height)
+    if not bars then
+        CreateBars()
+    end
+    held = true
+    target = height
+    Finish()
+end
+
+-- Back to what the Lens wants, in the given number of seconds.
+function ns.Letterbox.Release(seconds)
+    if held then
+        held = false
+        MoveTo(LensHeight(), seconds)
+    end
+end
 
 ns.RegisterModule({
     key = KEY,
@@ -113,17 +146,21 @@ ns.RegisterModule({
 
     Activate = function()
         active = true
-        MoveTo(ns.GetSetting(KEY, "height"))
+        if not held then
+            MoveTo(LensHeight())
+        end
     end,
 
     Deactivate = function()
         active = false
-        MoveTo(0)
+        if not held then
+            MoveTo(LensHeight())
+        end
     end,
 
     -- While the bars are shown, a new height applies at once: the slider is a live preview.
     OnSettingChanged = function(_, key, value)
-        if key == "height" and active then
+        if key == "height" and active and not held then
             target = value
             Finish()
         end
