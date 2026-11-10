@@ -1,36 +1,13 @@
 local _, ns = ...
 
 -- Moves the camera to the side, smoothly, with the game's own shoulder offset
--- (test_cameraOverShoulder, an experimental camera setting). The tween writes
--- the offset every frame while it moves; the CVar keeper brings the player's
--- own value back on /reload, logout and after a crash.
-
-local GetCVar = C_CVar and C_CVar.GetCVar or GetCVar
-local SetCVar = C_CVar and C_CVar.SetCVar or SetCVar
+-- (test_cameraOverShoulder, an experimental camera setting).
 
 local KEY = "CameraShift"
-local OFFSET = "test_cameraOverShoulder"
 -- Accessibility settings that keep the character in the middle and cancel the offset.
 local CENTERING = { "CameraKeepCharacterCentered", "CameraReduceUnexpectedMovement" }
 
-local tween
-local ownOffset = 0 -- the player's own offset, kept while the camera is shifted
-
-local function WriteOffset(value)
-    SetCVar(OFFSET, string.format("%.3f", value))
-end
-
--- The full Animation duration is the way between the player's own offset and
--- Camera offset; a shorter way takes proportionally less time.
-local function MoveTo(target, finished)
-    local span = math.abs(ns.GetSetting(KEY, "offset") - ownOffset)
-    local seconds = 0
-    if span > 0 then
-        seconds = ns.GetSetting(KEY, "duration") * math.abs(target - tween.value) / span
-    end
-    tween:MoveTo(target, seconds, finished)
-end
-
+local camera = ns.CreateCVarTween(KEY, "test_cameraOverShoulder")
 local active = false
 
 ns.RegisterModule({
@@ -73,37 +50,29 @@ ns.RegisterModule({
     end,
 
     Activate = function()
-        if GetCVar(OFFSET) == nil then
+        if not camera:IsAvailable() then
             return
         end
         active = true
         for _, name in ipairs(CENTERING) do
             ns.SetTemporaryCVar(KEY, name, "0", true)
         end
-        local target = ns.GetSetting(KEY, "offset")
-        ownOffset = tonumber(ns.HoldCVar(KEY, OFFSET, tostring(target))) or 0
-        if not tween then
-            tween = ns.CreateTween(tonumber(GetCVar(OFFSET)) or ownOffset, WriteOffset)
-        end
-        MoveTo(target)
+        camera:Shift(ns.GetSetting(KEY, "offset"), ns.GetSetting(KEY, "duration"))
     end,
 
-    -- Back to the player's own offset first; the centering settings return after it.
+    -- The centering settings return once the camera is back.
     Deactivate = function()
         if not active then
             return
         end
         active = false
-        MoveTo(ownOffset, function()
-            ns.RestoreCVars(KEY)
-        end)
+        camera:Return(ns.GetSetting(KEY, "offset"), ns.GetSetting(KEY, "duration"))
     end,
 
     -- While shifted, a new offset applies at once: the slider is a live preview.
     OnSettingChanged = function(_, key, value)
         if key == "offset" and active then
-            ns.HoldCVar(KEY, OFFSET, tostring(value))
-            tween:MoveTo(value, 0)
+            camera:Jump(value)
         end
     end,
 })

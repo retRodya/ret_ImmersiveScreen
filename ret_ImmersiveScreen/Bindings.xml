@@ -11,4 +11,7 @@
     <Binding name="RETIMMERSIVESCREEN_CAMERASHIFT" category="BINDING_HEADER_RETIMMERSIVESCREEN">
         RetImmersiveScreen_OnBinding("CameraShift")
     </Binding>
+    <Binding name="RETIMMERSIVESCREEN_FOV" category="BINDING_HEADER_RETIMMERSIVESCREEN">
+        RetImmersiveScreen_OnBinding("FOV")
+    </Binding>
 </Bindings>
