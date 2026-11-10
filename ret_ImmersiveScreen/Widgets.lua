@@ -5,6 +5,8 @@ local _, ns = ...
 
 local CHECKBOX_HEIGHT = 28
 local SLIDER_HEIGHT = 36
+local HEADING_HEIGHT = 26
+local SETTING_INDENT = 24
 local SLIDER_X, SLIDER_WIDTH = 150, 170
 -- The slider shows its value 6 px right of its frame; the undo button goes after it.
 local SLIDER_UNDO_X = 56
@@ -173,29 +175,59 @@ local function CreateSliderRow(parent, ownerKey, setting, label, disabled)
     }
 end
 
+-- A title over the rows below it, like a section header in the game's Settings.
+local function CreateHeadingRow(parent, label)
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetSize(1, HEADING_HEIGHT)
+
+    local text = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    text:SetPoint("BOTTOMLEFT", 4, 4)
+    text:SetText(label)
+
+    return { frame = frame, height = HEADING_HEIGHT, Update = function() end }
+end
+
 function ns.CreateSettingRow(parent, ownerKey, setting, label, disabled)
-    if setting.type == "slider" then
+    if setting.type == "heading" then
+        return CreateHeadingRow(parent, label)
+    elseif setting.type == "slider" then
         return CreateSliderRow(parent, ownerKey, setting, label, disabled)
     end
     return CreateCheckboxRow(parent, ownerKey, setting, label, disabled)
 end
 
--- The owner's visible settings, one under another. Returns the rows.
+-- The owner's settings, one under another. Returns a list with Update():
+-- it refreshes the rows, hides those whose IsShown() is false and moves
+-- the rest up.
 function ns.CreateSettingRows(parent, ownerKey, settings, disabled)
     local rows = {}
-    local y = 0
     for _, setting in ipairs(settings) do
         if not setting.hidden then
             local row = ns.CreateSettingRow(parent, ownerKey, setting, setting.title, disabled)
-            row.frame:SetPoint("TOPLEFT", 0, y)
-            if setting.type == "slider" then
-                row.frame:SetPoint("TOPRIGHT", 0, y)
-            end
-            y = y - row.height
+            row.setting = setting
             table.insert(rows, row)
         end
     end
-    return rows
+
+    local list = {}
+    function list.Update()
+        local y = 0
+        for _, row in ipairs(rows) do
+            local setting = row.setting
+            local shown = not setting.IsShown or setting.IsShown()
+            row.frame:SetShown(shown)
+            if shown then
+                row.frame:ClearAllPoints()
+                row.frame:SetPoint("TOPLEFT", (setting.indent or 0) * SETTING_INDENT, y)
+                if setting.type == "slider" then
+                    row.frame:SetPoint("TOPRIGHT", 0, y)
+                end
+                row.Update()
+                y = y - row.height
+            end
+        end
+    end
+    return list
 end
 
 --------------------------------------------------------------------------------
@@ -214,6 +246,7 @@ local function GetContext(action)
         return C_KeyBindings.GetBindingContextForAction(action)
     end
 end
+ns.GetBindingContext = GetContext
 
 -- False if the game did not load the action from Bindings.xml.
 local function IsKnownAction(action)

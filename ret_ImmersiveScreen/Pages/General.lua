@@ -55,9 +55,7 @@ ns.RegisterPage({
         local rows = ns.CreateSettingRows(settings, page.key, page.settings)
 
         function frame:Update()
-            for _, row in ipairs(rows) do
-                row.Update()
-            end
+            rows.Update()
         end
     end,
 })

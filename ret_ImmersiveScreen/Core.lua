@@ -37,6 +37,17 @@ local function LoadDatabase()
     return data
 end
 
+-- A table in saved settings for core features outside modules, e.g. CVars.lua.
+-- Available from ADDON_LOADED on.
+function ns.GetSaved(field)
+    local data = db[field]
+    if type(data) ~= "table" then
+        data = {}
+        db[field] = data
+    end
+    return data
+end
+
 --------------------------------------------------------------------------------
 -- Registry
 --------------------------------------------------------------------------------
@@ -64,22 +75,28 @@ end
 
 -- A setting is a table with:
 --   key          unique within its owner, also the key in saved settings
---   type         "checkbox" or "slider"
+--   type         "checkbox", "slider", or "heading" (a title over the rows below; no value)
 --   title        label next to the control
 --   description  tooltip text
 --   default      value until the player changes it
 --   min, max, step, format   sliders only; format is for string.format
 --   hidden       optional: not shown on the owner's page (another page shows it)
+--   IsShown      optional function: false hides the row and moves the rows below up
+--   indent       optional: rows to the right, for a setting that belongs to the one above
+local SETTING_TYPES = { checkbox = true, slider = true, heading = true }
+
 local function RegisterSettings(owner)
     owner.settings = owner.settings or {}
     local byKey = {}
     for _, setting in ipairs(owner.settings) do
         assert(type(setting.key) == "string", "setting.key is required")
         assert(not byKey[setting.key], "setting already registered: " .. setting.key)
-        assert(setting.type == "checkbox" or setting.type == "slider", "setting.type must be checkbox or slider")
+        assert(SETTING_TYPES[setting.type], "setting.type must be checkbox, slider or heading")
         assert(type(setting.title) == "string", "setting.title is required")
-        assert(type(setting.description) == "string", "setting.description is required")
-        assert(setting.default ~= nil, "setting.default is required")
+        if setting.type ~= "heading" then
+            assert(type(setting.description) == "string", "setting.description is required")
+            assert(setting.default ~= nil, "setting.default is required")
+        end
         if setting.type == "slider" then
             assert(type(setting.min) == "number" and type(setting.max) == "number", "slider needs min and max")
             assert(type(setting.step) == "number" and type(setting.format) == "string", "slider needs step and format")
@@ -254,7 +271,9 @@ local function RememberLoadedSettings()
     for _, owner in ipairs(ownerList) do
         local values = {}
         for _, setting in ipairs(owner.settings) do
-            values[setting.key] = ns.GetSetting(owner.key, setting.key)
+            if setting.type ~= "heading" then
+                values[setting.key] = ns.GetSetting(owner.key, setting.key)
+            end
         end
         loadedSettings[owner.key] = values
     end

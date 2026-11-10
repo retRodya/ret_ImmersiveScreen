@@ -190,9 +190,7 @@ local function CreateModulePage(parent, module)
         message:SetText(text or "")
         message:SetShown(text ~= nil)
         settings:SetShown(text == nil)
-        for _, row in ipairs(rows) do
-            row.Update()
-        end
+        rows.Update()
     end
 
     return page
@@ -377,6 +375,16 @@ local function CreateWindow()
     frame:HookScript("OnShow", Refresh)
     -- A key button waiting for a key must never keep the keyboard after the window closes.
     frame:HookScript("OnHide", ns.StopKeyListening)
+
+    -- Pages show game settings too (HideUI lists the names the game shows), and
+    -- the player may change them in the game's Settings while this window is open.
+    frame:HookScript("OnEvent", Refresh)
+    frame:HookScript("OnShow", function(self)
+        self:RegisterEvent("CVAR_UPDATE")
+    end)
+    frame:HookScript("OnHide", function(self)
+        self:UnregisterEvent("CVAR_UPDATE")
+    end)
     return frame
 end
 

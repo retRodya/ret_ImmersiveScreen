@@ -14,7 +14,13 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   in Settings > AddOns open the window.
 - Effects turn on or off with a checkbox in the list after `/reload`. Their settings
   apply at once; an undo button restores any value changed since the last reload.
-- Letterbox settings: bar height and animation duration.
+- HideUI hides the interface exactly like Alt+Z, and the names you choose.
+  Its page lists only the names the game's settings show, each checked by default.
+  Names go and come back one setting at a time, so there is no FPS spike.
+- While an effect is on, the first Escape turns off every effect; the next one
+  opens the game menu as usual.
+- Letterbox slides black bars in and out at the top and bottom of the screen.
+  Bar height and animation duration are adjustable.
 - Lens page: a key for each effect and for the Combined Lens. Keys also appear
   in Key Bindings under ret_ImmersiveScreen.
 - General: Hide screenshot message hides the "Screen captured" text.

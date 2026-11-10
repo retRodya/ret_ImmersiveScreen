@@ -10,6 +10,7 @@
 
 # core
 Core.lua
+CVars.lua
 Widgets.lua
 Window.lua
 Lens.lua
