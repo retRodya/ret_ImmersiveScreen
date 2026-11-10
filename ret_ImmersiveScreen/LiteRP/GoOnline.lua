@@ -86,7 +86,7 @@ ns.RegisterModule({
             min = 0,
             max = 5,
             step = 0.1,
-            default = 3,
+            default = 5,
             format = "%.1f s",
         },
     },
