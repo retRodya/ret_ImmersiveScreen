@@ -125,6 +125,8 @@ end
 --   lens         optional: an Effect with its own key that can join the Combined Lens
 --   enabledByDefault, combinedByDefault   optional, false if not set
 --   settings     optional list of settings shown on the module's page while it runs
+--   defaultsButton  optional: a button on the page sets them all back to their defaults
+--   buttons      optional list of { title, description, OnClick(module) } under them
 --   Start(module)                          optional: once after login, if enabled
 --   OnSettingChanged(module, key, value)   optional: a setting changed while running
 --   Activate(module), Deactivate(module)   optional: its key turned it on or off
@@ -265,6 +267,16 @@ end
 
 function ns.UndoSetting(ownerKey, key)
     ns.SetSetting(ownerKey, key, loadedSettings[ownerKey][key])
+end
+
+-- Every setting shown on the owner's page back to its default; settings shown
+-- on another page (hidden) stay as they are.
+function ns.ResetSettings(ownerKey)
+    for _, setting in ipairs(owners[ownerKey].settings) do
+        if setting.type ~= "heading" and not setting.hidden then
+            ns.SetSetting(ownerKey, setting.key, setting.default)
+        end
+    end
 end
 
 local function RememberLoadedSettings()

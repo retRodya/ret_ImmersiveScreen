@@ -30,4 +30,7 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   adjustable angle and animation duration, on its own key.
 - GoOffline closes the Letterbox bars in during the logout countdown, in three
   adjustable stages; cancelling the logout brings them back.
-- GoOnline is shown as a preview of a later version.
+- GoOnline opens the Letterbox bars from the middle of the screen and fades
+  them out after you enter the world. A Test button plays it at once.
+- GoOffline and GoOnline have a Defaults button that sets their page back to
+  its defaults.

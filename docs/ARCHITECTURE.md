@@ -47,6 +47,8 @@ ns.RegisterModule({
     combinedByDefault = true,
     settings = { ... },         -- см. «Настройки»
     -- section = "Stay",        -- заголовок на странице группы (LiteRP)
+    -- defaultsButton = true,   -- кнопка Defaults: все настройки страницы по умолчанию
+    -- buttons = { { title = "Test", description = "...", OnClick = function(module) end } },
     -- placeholder = true,      -- заглушка: серая, ничего не делает, не сохраняет
     -- Start(module)                         один раз после входа, если включён
     -- OnSettingChanged(module, key, value)  настройка изменилась, пока он работает
@@ -186,15 +188,21 @@ ns.RegisterPage({
   `EXPERIMENTAL_CVAR_WARNING`, а его кнопка Disable вызывает `ResetTestCvars()`.
 
 - **Механизм полос для LiteRP** — `ns.Letterbox` в `Effects/Letterbox.lua`:
-  `GetHeight()`, `Hold(height)` (полосы сразу на этой высоте, пока не отпустят;
-  линза в это время только запоминает своё состояние) и `Release(seconds)`
-  (назад к тому, что хочет линза). Работает и при выключенном эффекте
+  `GetHeight()`, `Hold(height, alpha)` (полосы сразу на этой высоте и с этой
+  непрозрачностью, пока не отпустят; линза в это время только запоминает своё
+  состояние) и `Release(seconds)` (назад к тому, что хочет линза, непрозрачные). Работает и при выключенном эффекте
   Letterbox, кадр полос создаётся при первом вызове.
 - **GoOffline** (`LiteRP/GoOffline.lua`) на `PLAYER_CAMPING` /
   `PLAYER_QUITING` (опечатка Blizzard) держит полосы и каждый кадр отсчёта
   поднимает их по этапам; `OnUpdate` только пока идёт отсчёт, до 20 с.
   `LOGOUT_CANCEL` зарегистрировано только на время отсчёта; хук на
   `CancelLogout` ловит отмену из кода, например кнопкой Cancel.
+- **GoOnline** (`LiteRP/GoOnline.lua`): `PLAYER_ENTERING_WORLD` один раз; если
+  это первый вход (`isInitialLogin`), ждёт `LOADING_SCREEN_DISABLED` и держит
+  полосы, линейно уменьшая высоту и непрозрачность до 0, потом отпускает.
+  Кнопка Test вызывает то же.
+- `ns.ResetSettings(owner)` — кнопка Defaults: все настройки страницы (кроме
+  скрытых) — значения по умолчанию.
 
 ## Временные CVar
 

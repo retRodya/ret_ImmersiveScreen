@@ -1,8 +1,9 @@
 local _, ns = ...
 
-local WIDTH, HEIGHT = 600, 440
+local WIDTH, HEIGHT = 600, 480
 local LIST_WIDTH = 170
 local ENTRY_HEIGHT = 22
+local BUTTON_WIDTH = 120
 
 -- Offsets of ButtonFrameTemplate's inset: title bar on top, button bar at the bottom.
 local INSET_LEFT, INSET_RIGHT, INSET_TOP, INSET_BOTTOM = 4, -6, -24, 26
@@ -145,6 +146,45 @@ local function CreateGroupPage(parent, category, modules)
     return page
 end
 
+-- Buttons at the bottom of a module's settings, left to right: Defaults first,
+-- then the module's own, e.g. Test.
+local function CreateModuleButtons(parent, module)
+    local list = {}
+    if module.defaultsButton then
+        table.insert(list, {
+            title = SETTINGS_DEFAULTS or "Defaults",
+            description = "Sets every setting on this page back to its default.",
+            OnClick = function()
+                ns.ResetSettings(module.key)
+                ns.RefreshWindow()
+            end,
+        })
+    end
+    for _, info in ipairs(module.buttons or {}) do
+        table.insert(list, info)
+    end
+
+    local previous
+    for _, info in ipairs(list) do
+        local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+        button:SetSize(BUTTON_WIDTH, 22)
+        if previous then
+            button:SetPoint("LEFT", previous, "RIGHT", 8, 0)
+        else
+            button:SetPoint("BOTTOMLEFT")
+        end
+        button:SetText(info.title)
+        button:SetScript("OnClick", function()
+            info.OnClick(module)
+        end)
+        button:SetScript("OnEnter", function(self)
+            ns.ShowTooltip(self, info.title, info.description)
+        end)
+        button:SetScript("OnLeave", GameTooltip_Hide)
+        previous = button
+    end
+end
+
 -- The page shows the module's settings only while it runs. Otherwise it tells
 -- the player what to do next. A placeholder shows its future settings greyed out.
 local function CreateModulePage(parent, module)
@@ -173,6 +213,7 @@ local function CreateModulePage(parent, module)
     settings:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -12)
     settings:SetPoint("BOTTOMRIGHT", -16, 16)
     local rows = ns.CreateSettingRows(settings, module.key, module.settings, module.placeholder)
+    CreateModuleButtons(settings, module)
 
     function page:Update()
         local text

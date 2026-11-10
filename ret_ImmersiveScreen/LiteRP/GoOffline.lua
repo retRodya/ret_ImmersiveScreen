@@ -112,6 +112,7 @@ ns.RegisterModule({
     section = "Stay",
     title = "GoOffline",
     description = "While the logout countdown runs, the Letterbox bars slowly close in. Cancelling the logout brings them back.",
+    defaultsButton = true,
     settings = settings,
 
     Start = function()

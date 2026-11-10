@@ -92,21 +92,24 @@ function ns.Letterbox.GetHeight()
     return current
 end
 
--- Sets the bars to a height at once, every call, until Release. The Lens keeps
--- track of Letterbox meanwhile without moving the bars.
-function ns.Letterbox.Hold(height)
+-- Sets the bars to a height and opacity (0 to 1, opaque if not given) at once,
+-- every call, until Release. The Lens keeps track of Letterbox meanwhile
+-- without moving the bars.
+function ns.Letterbox.Hold(height, alpha)
     if not bars then
         CreateBars()
     end
     held = true
     target = height
+    bars:SetAlpha(alpha or 1)
     Finish()
 end
 
--- Back to what the Lens wants, in the given number of seconds.
+-- Back to what the Lens wants, opaque, in the given number of seconds.
 function ns.Letterbox.Release(seconds)
     if held then
         held = false
+        bars:SetAlpha(1)
         MoveTo(LensHeight(), seconds)
     end
 end
