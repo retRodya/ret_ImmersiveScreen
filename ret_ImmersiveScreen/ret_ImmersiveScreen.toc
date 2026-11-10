@@ -11,6 +11,7 @@
 # core
 Core.lua
 CVars.lua
+Tween.lua
 Widgets.lua
 Window.lua
 Lens.lua

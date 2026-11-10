@@ -39,8 +39,9 @@ local function WriteNext(_, elapsed)
     end
     sinceWrite = 0
     local name = table.remove(queue, 1)
-    if name then
-        local job = pending[name]
+    local job = name and pending[name]
+    -- A job is gone if HoldCVar took the CVar back meanwhile.
+    if job then
         pending[name] = nil
         if GetCVar(name) ~= job.value then
             SetCVar(name, job.value)
@@ -69,13 +70,8 @@ local function Queue(name, value, restores)
     end
 end
 
--- Skips CVars the client does not have. While the original is still waiting
--- to be written back, it stays kept and the restore is cancelled.
-function ns.SetTemporaryCVar(owner, name, value)
-    local current = GetCVar(name)
-    if current == nil then
-        return
-    end
+-- Remembers the original before the first change; the baseline notes what we force.
+local function Keep(owner, name, current, forced)
     local kept = originals[owner]
     if not kept then
         kept = {}
@@ -83,10 +79,44 @@ function ns.SetTemporaryCVar(owner, name, value)
     end
     if kept[name] == nil then
         kept[name] = current
-        GetBaseline()[name] = { value = current, forced = value }
         events:RegisterEvent("PLAYER_LOGOUT")
     end
-    Queue(name, value)
+    GetBaseline()[name] = { value = kept[name], forced = forced }
+    return kept[name]
+end
+
+-- Skips CVars the client does not have. While the original is still waiting
+-- to be written back, it stays kept and the restore is cancelled.
+-- now: written at once instead of queued, for a CVar another change depends on.
+function ns.SetTemporaryCVar(owner, name, value, now)
+    local current = GetCVar(name)
+    if current == nil then
+        return
+    end
+    Keep(owner, name, current, value)
+    if not now then
+        Queue(name, value)
+        return
+    end
+    if pending[name] then
+        pending[name] = { value = value }
+    end
+    if current ~= value then
+        SetCVar(name, value)
+    end
+end
+
+-- For a CVar the Effect writes itself, e.g. every frame of an animation:
+-- keeps the original like SetTemporaryCVar and returns it. forced is the value
+-- the Effect is heading for, for the crash check at login.
+function ns.HoldCVar(owner, name, forced)
+    local current = GetCVar(name)
+    if current == nil then
+        return nil
+    end
+    -- A restore still waiting in the queue would undo the Effect's own writes.
+    pending[name] = nil
+    return Keep(owner, name, current, forced)
 end
 
 -- The value as the player set it: the kept original while an Effect holds the CVar.
@@ -108,11 +138,20 @@ function ns.RestoreCVars(owner)
     end
 end
 
+-- The game may return a number CVar in another format, e.g. "1.500000" for "1.5".
+local function SameValue(a, b)
+    if a == b then
+        return true
+    end
+    local x, y = tonumber(a), tonumber(b)
+    return x ~= nil and y ~= nil and math.abs(x - y) < 0.001
+end
+
 -- After a crash: a CVar that still holds our forced value gets back the value
 -- it had at the last clean exit.
 local function RecoverAfterCrash()
     for name, entry in pairs(GetBaseline()) do
-        if entry.value ~= entry.forced and GetCVar(name) == entry.forced then
+        if not SameValue(entry.value, entry.forced) and SameValue(GetCVar(name), entry.forced) then
             SetCVar(name, entry.value)
         end
     end

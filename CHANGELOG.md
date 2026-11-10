@@ -24,4 +24,6 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Lens page: a key for each effect and for the Combined Lens. Keys also appear
   in Key Bindings under ret_ImmersiveScreen.
 - General: Hide screenshot message hides the "Screen captured" text.
-- CameraShift, FOV, GoOffline and GoOnline are shown as previews of later versions.
+- CameraShift smoothly moves the camera to the side, with adjustable offset and
+  animation duration, on its own key.
+- FOV, GoOffline and GoOnline are shown as previews of later versions.
