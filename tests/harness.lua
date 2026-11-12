@@ -217,9 +217,13 @@ function GetAppropriateTopLevelParent() return UIParent end
 function RunBinding() error("RunBinding is protected") end
 function InCombatLockdown() return T.inCombat end
 -- Like the game's: the hook runs after the original, whose results are kept.
-function hooksecurefunc(name, hook)
-    local original = _G[name]
-    _G[name] = function(...)
+-- hooksecurefunc("Name", hook) or hooksecurefunc(table, "key", hook).
+function hooksecurefunc(owner, name, hook)
+    if type(owner) == "string" then
+        owner, name, hook = _G, owner, name
+    end
+    local original = owner[name]
+    owner[name] = function(...)
         local results = { original(...) }
         hook(...)
         return unpack(results)
@@ -250,6 +254,31 @@ EventRegistry = {
 function T.TriggerEvent(event, ...)
     for _, callback in ipairs(T.callbacks[event] or {}) do callback(...) end
 end
+
+-- The chat input. ActivateChat shows and focuses it, as the game's does; in a
+-- hidden interface it takes no focus.
+function GetCurrentKeyBoardFocus() return T.focus end
+local chatBox = New("EditBox", "ChatFrame1EditBox", UIParent)
+function chatBox:SetFocus()
+    if not UIParent.shown then return end
+    T.focus = self
+    T.TriggerEvent("ChatFrame.OnEditBoxFocusGained", self)
+end
+function chatBox:ClearFocus()
+    if T.focus ~= self then return end
+    T.focus = nil
+    T.TriggerEvent("ChatFrame.OnEditBoxFocusLost", self)
+end
+ChatFrameUtil = {
+    ActivateChat = function(editBox)
+        editBox:Show()
+        editBox:SetFocus()
+    end,
+}
+T.chatBox = chatBox
+-- Enter: the game opens the chat input. Escape in it: focus lost.
+function T.OpenChat() ChatFrameUtil.ActivateChat(chatBox) end
+function T.CloseChat() chatBox:ClearFocus() end
 CancelLogout = noop
 function StaticPopup_Show(which)
     local dialog = T.dialogs[which] or New("Frame", nil, UIParent)

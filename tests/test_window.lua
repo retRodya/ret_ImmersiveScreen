@@ -74,6 +74,9 @@ defaults[1]:Click()
 assert(ns.GetSetting("GoOffline", "rate2") == 3, "Defaults resets the page")
 print("  LiteRP pages ok")
 
+-- Escape Button on the Lens page, off by default.
+assert(T.RowShown("Escape Button") and ns.GetSetting("Lens", "escapeButton") == false)
+
 -- Key buttons: nothing listens until a button is clicked.
 local status
 for _, f in ipairs(T.frames) do
