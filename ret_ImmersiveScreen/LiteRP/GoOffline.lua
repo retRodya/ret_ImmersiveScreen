@@ -10,14 +10,11 @@ local _, ns = ...
 local KEY = "GoOffline"
 local COUNTDOWN = 20 -- seconds of the game's logout countdown
 local RETURN_SECONDS = 0.15 -- bars and interface back after a cancelled logout
-local CHAT_SECONDS = 0.3 -- interface and bar opacity when chat gains or loses focus
-local CHAT_BAR_ALPHA = 0.5
 local COUNTDOWN_DIALOGS = { CAMP = true, QUIT = true }
 
 local frame
 local elapsed -- seconds into the countdown, nil while there is none
 local startHeight
-local chatFocused = false
 local barAlpha, barAlphaTarget = 1, 1
 
 local function Setting(key)
@@ -37,7 +34,7 @@ end
 -- Runs while the countdown runs or the bar opacity still moves.
 local function OnUpdate(_, delta)
     elapsed = math.min(COUNTDOWN, elapsed + delta)
-    local step = delta * (1 - CHAT_BAR_ALPHA) / CHAT_SECONDS
+    local step = delta * (1 - ns.ChatFocus.BAR_ALPHA) / ns.ChatFocus.SECONDS
     if barAlpha < barAlphaTarget then
         barAlpha = math.min(barAlphaTarget, barAlpha + step)
     else
@@ -60,13 +57,14 @@ end
 -- Chat focus brings the interface back and makes the bars half transparent;
 -- without it the interface fades and the bars are opaque.
 local function ApplyChatFocus()
-    barAlphaTarget = chatFocused and CHAT_BAR_ALPHA or 1
+    local chatFocused = ns.ChatFocus.IsFocused()
+    barAlphaTarget = chatFocused and ns.ChatFocus.BAR_ALPHA or 1
     frame:SetScript("OnUpdate", OnUpdate)
     if not Setting("fadeInterface") then
         return
     end
     if chatFocused then
-        ns.InterfaceFade.In(CHAT_SECONDS)
+        ns.InterfaceFade.In(ns.ChatFocus.SECONDS)
     else
         ns.InterfaceFade.Out(Setting("fadeDuration"))
         for which in pairs(COUNTDOWN_DIALOGS) do
@@ -75,11 +73,7 @@ local function ApplyChatFocus()
     end
 end
 
-local function SetChatFocused(focused)
-    if chatFocused == focused then
-        return
-    end
-    chatFocused = focused
+local function OnChatFocus()
     if elapsed then
         ApplyChatFocus()
     end
@@ -93,7 +87,7 @@ local function StartCountdown()
     end
     elapsed = 0
     startHeight = math.min(Setting("maxHeight"), math.max(ns.Letterbox.GetHeight(), Setting("startHeight")))
-    barAlpha = chatFocused and CHAT_BAR_ALPHA or 1
+    barAlpha = ns.ChatFocus.IsFocused() and ns.ChatFocus.BAR_ALPHA or 1
     ns.Letterbox.Hold(startHeight, barAlpha)
     frame:RegisterEvent("LOGOUT_CANCEL")
     ApplyChatFocus()
@@ -210,17 +204,6 @@ ns.RegisterModule({
                 KeepCountdownDialog(which)
             end
         end)
-        -- The chat input reports its focus through EventRegistry, in Retail and Forever.
-        if EventRegistry and EventRegistry.RegisterCallback then
-            local owner = {}
-            EventRegistry:RegisterCallback("ChatFrame.OnEditBoxFocusGained", function()
-                SetChatFocused(true)
-            end, owner)
-            for _, event in ipairs({ "ChatFrame.OnEditBoxFocusLost", "ChatFrame.OnEditBoxHide" }) do
-                EventRegistry:RegisterCallback(event, function()
-                    SetChatFocused(false)
-                end, owner)
-            end
-        end
+        ns.ChatFocus.Subscribe(OnChatFocus)
     end,
 })

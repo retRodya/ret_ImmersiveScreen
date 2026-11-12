@@ -1,10 +1,11 @@
 local _, ns = ...
 
--- Fades the whole interface (UIParent) to transparent and back without hiding
--- it: during the logout countdown it must stay shown, since hiding its dialog
--- cancels the logout. The minimap draws its pins regardless of its parent's
--- opacity, so it is hidden once the interface is transparent. Frames that must
--- stay visible, e.g. that dialog, can be kept opaque.
+-- Fades the whole interface (UIParent). Out and In fade it to transparent and
+-- back without hiding it: during the logout countdown it must stay shown, since
+-- hiding its dialog cancels the logout. The minimap draws its pins regardless
+-- of its parent's opacity, so it is hidden once the interface is transparent.
+-- Frames that must stay visible, e.g. that dialog, can be kept opaque.
+-- Reveal and Conceal fade in and out an interface hidden as Alt+Z does.
 -- A mechanism only: it creates its frame on first use.
 
 ns.InterfaceFade = {}
@@ -65,6 +66,26 @@ function ns.InterfaceFade.In(seconds)
     wipe(kept)
     FadeTo(alphaBefore, seconds, function()
         alphaBefore = nil
+    end)
+end
+
+-- For HideUI: brings back an interface hidden as Alt+Z does, fading it in.
+-- Also brings a half faded one back to full, cancelling a Conceal.
+function ns.InterfaceFade.Reveal(seconds)
+    if not UIParent:IsShown() then
+        UIParent:SetAlpha(0)
+        SetUIVisibility(true)
+    end
+    FadeTo(1, seconds)
+end
+
+-- Fades the interface out, then hides it as Alt+Z does, opaque again for
+-- whoever shows it next.
+function ns.InterfaceFade.Conceal(seconds)
+    FadeTo(0, seconds, function()
+        SetUIVisibility(false)
+        UIParent:SetAlpha(1)
+        tween.value = 1
     end)
 end
 

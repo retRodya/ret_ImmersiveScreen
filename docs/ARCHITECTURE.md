@@ -13,7 +13,8 @@
 | `Core.lua` | Метаданные из `.toc`, сохранённые настройки, реестр модулей и страниц, настройки с откатом, запуск после входа. |
 | `CVars.lua` | Игровые настройки (CVar), которые эффект меняет на время: хранит исходные значения и возвращает их, в том числе после вылета. |
 | `Tween.lua` | Плавный переход числа к цели (smoothstep), `OnUpdate` только пока число движется. `ns.CreateCVarTween` — одна числовая CVar, которую эффект плавно ведёт к своему значению и обратно к значению игрока: CameraShift и FOV. |
-| `InterfaceFade.lua` | Затухание всего интерфейса прозрачностью, без скрытия: `ns.InterfaceFade.Out/In/Keep`. Им пользуется GoOffline. |
+| `InterfaceFade.lua` | Затухание всего интерфейса: `Out/In/Keep` — прозрачностью, без скрытия (GoOffline); `Reveal/Conceal` — проявить и спрятать интерфейс, скрытый как Alt+Z (HideUI при фокусе чата). |
+| `ChatFocus.lua` | Общий наблюдатель фокуса чата: `ns.ChatFocus.Subscribe`, `OnOpen`, `IsFocused`, постоянные `SECONDS` и `BAR_ALPHA`. |
 | `Widgets.lua` | Общие элементы: подсказка, кнопка отката, строка-чекбокс, строка-ползунок, кнопка клавиши. |
 | `Window.lua` | Окно: список слева, страницы справа, кнопка Reload UI. |
 | `Lens.lua` | Клавиши: какая клавиша включает какой эффект, Combined Lens. Обработчик для `Bindings.xml`. |
@@ -106,11 +107,11 @@ ns.RegisterPage({
   Lens — `RETIMMERSIVESCREEN_COMBINEDLENS`. Новую клавишу нужно добавить
   в `Bindings.xml` и дать ей имя `BINDING_NAME_…` в `Lens.lua`.
 - Эффект в Combined Lens своей клавишей не включается.
-- **Esc.** Пока работает хоть один эффект, клавиши `TOGGLEGAMEMENU`
 - **Escape Button** — настройка страницы Lens (`ns.GetSetting("Lens",
   "escapeButton")`, на странице под клавишей Combined Lens). Если она
   включена, выключение Combined Lens её клавишей вызывает `DeactivateAll()` —
   то же, что первый Esc.
+- **Esc.** Пока работает хоть один эффект, клавиши `TOGGLEGAMEMENU`
   переназначены на кнопку `RetImmersiveScreenEscapeButton`
   (`SetOverrideBindingClick`): первый Esc выключает все эффекты, переназначение
   снимается, следующий Esc открывает меню. Переназначения нельзя менять в бою:
@@ -215,12 +216,19 @@ ns.RegisterPage({
 - **GoOffline** при отсчёте зовёт `Out` и держит видимым окно `CAMP` / `QUIT`:
   находит его `StaticPopup_FindVisible`, а если игра показала его позже —
   хуком на `StaticPopup_Show`. При отмене — `In(0.15)`.
-- **Фокус чата** GoOffline ловит через `EventRegistry`:
-  `ChatFrame.OnEditBoxFocusGained`, `…FocusLost` и `…OnEditBoxHide`
-  (`ChatFrameEditBox.lua`, одинаково в Retail и Forever). Это реестр
-  для аддонов, подписка не заражает код Blizzard — в отличие от
-  `RegisterGameMenuEscHandler`. Непрозрачность полос (1 ↔ 0.5) GoOffline ведёт
-  сам в своём `OnUpdate` вместе с высотой.
+- **Фокус чата** — `ns.ChatFocus` (`ChatFocus.lua`). Подписывается через
+  `EventRegistry` на `ChatFrame.OnEditBoxFocusGained`, `…FocusLost` и
+  `…OnEditBoxHide` (`ChatFrameEditBox.lua`, одинаково в Retail и Forever). Это
+  реестр для аддонов, подписка не заражает код Blizzard — в отличие от
+  `RegisterGameMenuEscHandler`. Поле ввода в скрытом интерфейсе фокус не
+  получает, поэтому есть ещё `OnOpen`: хук после `ChatFrameUtil.ActivateChat`
+  (Enter, `/`). Подписка — в `Start` модуля, при первом подписчике.
+- Кто что делает при фокусе: **HideUI** в `OnOpen` проявляет скрытый им
+  интерфейс (`InterfaceFade.Reveal`) и ставит фокус полю ввода, при потере
+  фокуса — `Conceal`; выключение HideUI всегда оставляет интерфейс полностью
+  видимым (`Reveal(0)`). **Letterbox** ведёт прозрачность полос через `Tween`
+  к 0.5 и обратно, пока полосы не держит LiteRP. **GoOffline** ведёт
+  прозрачность полос сам, в своём `OnUpdate`, вместе с высотой.
 - **GoOnline** (`LiteRP/GoOnline.lua`): `PLAYER_ENTERING_WORLD` один раз; если
   это первый вход (`isInitialLogin`), ждёт `LOADING_SCREEN_DISABLED` и держит
   полосы, линейно уменьшая высоту и непрозрачность до 0, потом отпускает.

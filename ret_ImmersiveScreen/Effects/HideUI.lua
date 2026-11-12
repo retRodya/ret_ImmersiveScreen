@@ -138,6 +138,34 @@ end
 
 -- The interface may already be hidden with Alt+Z; then it stays hidden afterwards.
 local interfaceWasShown
+local active = false
+
+-- Chat: while it has focus, the interface HideUI hid fades back in, so the
+-- player sees what they type; names stay hidden. Without focus it fades out
+-- and hides again.
+local function HidesInterface()
+    return active and interfaceWasShown
+end
+
+local function OnChatOpen(editBox)
+    if HidesInterface() and not UIParent:IsShown() then
+        ns.InterfaceFade.Reveal(ns.ChatFocus.SECONDS)
+        if GetCurrentKeyBoardFocus() ~= editBox then
+            editBox:SetFocus()
+        end
+    end
+end
+
+local function OnChatFocus(focused)
+    if not HidesInterface() then
+        return
+    end
+    if focused then
+        ns.InterfaceFade.Reveal(ns.ChatFocus.SECONDS)
+    else
+        ns.InterfaceFade.Conceal(ns.ChatFocus.SECONDS)
+    end
+end
 
 ns.RegisterModule({
     key = KEY,
@@ -149,7 +177,13 @@ ns.RegisterModule({
     combinedByDefault = true,
     settings = settings,
 
+    Start = function()
+        ns.ChatFocus.OnOpen(OnChatOpen)
+        ns.ChatFocus.Subscribe(OnChatFocus)
+    end,
+
     Activate = function(module)
+        active = true
         for _, entry in ipairs(NAMES) do
             if IsShownInGame(entry) and ns.GetSetting(KEY, entry.key) then
                 for _, name in ipairs(entry.cvars) do
@@ -163,11 +197,13 @@ ns.RegisterModule({
         end
     end,
 
-    -- The game may have shown the interface already, e.g. on Esc in combat.
+    -- The game may have shown the interface already, e.g. on Esc in combat, and
+    -- chat may have it half faded: either way it ends fully shown.
     Deactivate = function(module)
+        active = false
         ns.RestoreCVars(module.key)
-        if interfaceWasShown and not UIParent:IsShown() then
-            SetUIVisibility(true)
+        if interfaceWasShown then
+            ns.InterfaceFade.Reveal(0)
         end
     end,
 })

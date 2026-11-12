@@ -3,12 +3,14 @@ local _, ns = ...
 -- Black bars at the top and bottom of the screen. The bar frame has no parent,
 -- so the bars stay when HideUI hides the interface; its anchors make it cover
 -- the same area as UIParent, at any UI scale. The frame is created on first use
--- and runs OnUpdate only while the bars move.
+-- and runs OnUpdate only while the bars move. While chat has focus, the bars
+-- turn half transparent.
 
 local KEY = "Letterbox"
 local MIN_HEIGHT = 0.01 -- a texture must never be 0 high
 
 local bars, top, bottom
+local fade -- the bars' opacity
 local current = 0 -- bar height now, in percent of the screen height
 local start, target = 0, 0
 local elapsed, duration = 0, 0
@@ -56,6 +58,10 @@ local function CreateBars()
     bottom:SetColorTexture(0, 0, 0, 1)
     bottom:SetPoint("BOTTOMLEFT")
     bottom:SetPoint("BOTTOMRIGHT")
+
+    fade = ns.CreateTween(1, function(alpha)
+        bars:SetAlpha(alpha)
+    end)
 end
 
 -- A change in the middle of an animation continues from where the bars are now.
@@ -84,6 +90,17 @@ local function LensHeight()
     return active and ns.GetSetting(KEY, "height") or 0
 end
 
+-- Half transparent while chat has focus, otherwise opaque.
+local function LensAlpha()
+    return active and ns.ChatFocus.IsFocused() and ns.ChatFocus.BAR_ALPHA or 1
+end
+
+local function OnChatFocus()
+    if bars and not held then
+        fade:MoveTo(LensAlpha(), ns.ChatFocus.SECONDS)
+    end
+end
+
 -- For LiteRP features. A mechanism only: it works even while the Letterbox
 -- effect is disabled, and creates the bar frame on first use.
 ns.Letterbox = {}
@@ -101,15 +118,15 @@ function ns.Letterbox.Hold(height, alpha)
     end
     held = true
     target = height
-    bars:SetAlpha(alpha or 1)
+    fade:MoveTo(alpha or 1, 0)
     Finish()
 end
 
--- Back to what the Lens wants, opaque, in the given number of seconds.
+-- Back to what the Lens wants, in the given number of seconds.
 function ns.Letterbox.Release(seconds)
     if held then
         held = false
-        bars:SetAlpha(1)
+        fade:MoveTo(LensAlpha(), 0)
         MoveTo(LensHeight(), seconds)
     end
 end
@@ -147,10 +164,15 @@ ns.RegisterModule({
         },
     },
 
+    Start = function()
+        ns.ChatFocus.Subscribe(OnChatFocus)
+    end,
+
     Activate = function()
         active = true
         if not held then
             MoveTo(LensHeight())
+            fade:MoveTo(LensAlpha(), 0)
         end
     end,
 

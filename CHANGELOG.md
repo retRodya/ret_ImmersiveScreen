@@ -19,15 +19,18 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Names go and come back one setting at a time, so there is no FPS spike.
 - While an effect is on, the first Escape turns off every effect; the next one
   opens the game menu as usual.
+- Typing in chat while effects are on: the interface HideUI hid fades back in
+  and Letterbox bars turn half transparent; names stay hidden. Closing chat
+  hides the interface again.
 - Letterbox slides black bars in and out at the top and bottom of the screen.
   Bar height and animation duration are adjustable.
 - Lens page: a key for each effect and for the Combined Lens. Keys also appear
   in Key Bindings under ret_ImmersiveScreen.
+- Escape Button for the Combined Lens: turning it off with its key turns off
+  every effect, as Escape does.
 - General: Hide screenshot message hides the "Screen captured" text.
 - CameraShift smoothly moves the camera to the side, with adjustable offset and
   animation duration, on its own key.
-- Escape Button for the Combined Lens: turning it off with its key turns off
-  every effect, as Escape does.
 - FOV smoothly changes the camera's field of view and returns it to yours, with
   adjustable angle and animation duration, on its own key.
 - GoOffline closes the Letterbox bars in during the logout countdown, in three
