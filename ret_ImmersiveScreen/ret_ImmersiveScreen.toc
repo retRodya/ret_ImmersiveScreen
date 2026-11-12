@@ -12,6 +12,7 @@
 Core.lua
 CVars.lua
 Tween.lua
+InterfaceFade.lua
 Widgets.lua
 Window.lua
 Lens.lua

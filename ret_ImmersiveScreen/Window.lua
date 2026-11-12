@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local WIDTH, HEIGHT = 600, 480
+local WIDTH, HEIGHT = 600, 520
 local LIST_WIDTH = 170
 local ENTRY_HEIGHT = 22
 local BUTTON_WIDTH = 120

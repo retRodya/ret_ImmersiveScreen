@@ -4,7 +4,7 @@ local _, ns = ...
 -- setting rows (checkbox, slider) and key buttons.
 
 local CHECKBOX_HEIGHT = 28
-local SLIDER_HEIGHT = 36
+local SLIDER_HEIGHT = 32
 local HEADING_HEIGHT = 26
 local SETTING_INDENT = 24
 local SLIDER_X, SLIDER_WIDTH = 150, 170
