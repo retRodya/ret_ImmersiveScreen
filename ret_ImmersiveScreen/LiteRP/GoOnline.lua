@@ -1,7 +1,8 @@
 local _, ns = ...
 
 -- After you enter the world, the Letterbox bars open from the middle of the
--- screen and fade out at the same time, at a steady rate. Only on the first
+-- screen while their opacity goes from the starting to the ending one, at a
+-- steady rate. Only on the first
 -- login of a session, not on /reload or a zone change; it starts when the
 -- loading screen is gone, so it is not hidden under it.
 
@@ -27,8 +28,10 @@ local function OnUpdate(_, delta)
         Stop()
         return
     end
-    local left = 1 - elapsed / duration
-    ns.Letterbox.Hold(Setting("startHeight") * left, Setting("startOpacity") / 100 * left)
+    local progress = elapsed / duration
+    local startOpacity = Setting("startOpacity")
+    local opacity = startOpacity + (Setting("endOpacity") - startOpacity) * progress
+    ns.Letterbox.Hold(Setting("startHeight") * (1 - progress), opacity / 100)
 end
 
 -- From the start again if it already runs, e.g. on a second Test.
@@ -71,11 +74,22 @@ ns.RegisterModule({
             key = "startOpacity",
             type = "slider",
             title = "Starting opacity",
-            description = "How opaque the bars start. They fade to fully transparent by the end.",
+            description = "How opaque the bars are when they start to open.",
             min = 0,
             max = 100,
             step = 1,
             default = 100,
+            format = "%d%%",
+        },
+        {
+            key = "endOpacity",
+            type = "slider",
+            title = "Ending opacity",
+            description = "How opaque the bars are by the time they have opened. The opacity changes at a steady rate between the two.",
+            min = 0,
+            max = 100,
+            step = 1,
+            default = 0,
             format = "%d%%",
         },
         {
