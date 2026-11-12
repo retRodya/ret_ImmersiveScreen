@@ -26,6 +26,8 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - General: Hide screenshot message hides the "Screen captured" text.
 - CameraShift smoothly moves the camera to the side, with adjustable offset and
   animation duration, on its own key.
+- Escape Button for the Combined Lens: turning it off with its key turns off
+  every effect, as Escape does.
 - FOV smoothly changes the camera's field of view and returns it to yours, with
   adjustable angle and animation duration, on its own key.
 - GoOffline closes the Letterbox bars in during the logout countdown, in three

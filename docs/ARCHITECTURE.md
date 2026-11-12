@@ -107,6 +107,10 @@ ns.RegisterPage({
   в `Bindings.xml` и дать ей имя `BINDING_NAME_…` в `Lens.lua`.
 - Эффект в Combined Lens своей клавишей не включается.
 - **Esc.** Пока работает хоть один эффект, клавиши `TOGGLEGAMEMENU`
+- **Escape Button** — настройка страницы Lens (`ns.GetSetting("Lens",
+  "escapeButton")`, на странице под клавишей Combined Lens). Если она
+  включена, выключение Combined Lens её клавишей вызывает `DeactivateAll()` —
+  то же, что первый Esc.
   переназначены на кнопку `RetImmersiveScreenEscapeButton`
   (`SetOverrideBindingClick`): первый Esc выключает все эффекты, переназначение
   снимается, следующий Esc открывает меню. Переназначения нельзя менять в бою:

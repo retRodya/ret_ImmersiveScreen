@@ -134,6 +134,7 @@ end
 
 -- If any of its Effects is on, the key turns them all off; otherwise all on.
 -- One press always gives a clear state, even if the set changed meanwhile.
+-- With Escape Button on, turning it off acts as Esc: every Effect goes off.
 local function ToggleCombinedLens()
     local members = {}
     local anyActive = false
@@ -142,6 +143,10 @@ local function ToggleCombinedLens()
             table.insert(members, module)
             anyActive = anyActive or active[module.key] == true
         end
+    end
+    if anyActive and ns.GetSetting("Lens", "escapeButton") then
+        DeactivateAll()
+        return
     end
     for _, module in ipairs(members) do
         SetActive(module, not anyActive)

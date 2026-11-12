@@ -15,8 +15,19 @@ end
 ns.RegisterPage({
     key = "Lens",
     title = "Lens",
+    settings = {
+        {
+            -- Shown under the Combined Lens key rather than in a list.
+            key = "escapeButton",
+            type = "checkbox",
+            title = "Escape Button",
+            description = "Turning the Combined Lens off with its key turns off every effect, as Esc does, not only the effects in the Combined Lens.",
+            default = false,
+            hidden = true,
+        },
+    },
 
-    Create = function(_, frame)
+    Create = function(page, frame)
         local intro = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
         intro:SetPoint("TOPLEFT", frame.title, "BOTTOMLEFT", 0, -8)
         intro:SetPoint("TOPRIGHT", frame.title, "BOTTOMRIGHT", 0, -8)
@@ -61,6 +72,10 @@ ns.RegisterPage({
         lensName:SetText("Combined Lens")
         local lensKey = ns.CreateKeyButton(grid, ns.GetBindingAction(ns.COMBINED_LENS), status)
         lensKey:SetPoint("LEFT", grid, "TOPLEFT", KEY_X, y)
+        -- Under the Combined Lens key, which it changes.
+        y = y - ROW_HEIGHT
+        local escapeButton = ns.CreateSettingRow(grid, page.key, page.settingsByKey.escapeButton, "Escape Button")
+        escapeButton.frame:SetPoint("LEFT", grid, "TOPLEFT", KEY_X, y)
 
         status:SetPoint("TOPLEFT", grid, "TOPLEFT", 0, y - 28)
         status:SetPoint("RIGHT", frame, "RIGHT", -16, 0)
@@ -79,6 +94,7 @@ ns.RegisterPage({
                 row.combined.Update()
             end
             lensKey:Update()
+            escapeButton.Update()
         end
 
         frame:HookScript("OnHide", function()
