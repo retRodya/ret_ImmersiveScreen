@@ -10,6 +10,8 @@ describes the core and how to add an effect or a page.
 
 - `ret_ImmersiveScreen/` — the addon exactly as it ships. Only game files go here.
 - `docs/` — planning and development documents.
+- `tests/` — tests that load the addon with WoW API stubs; run `luajit tests/run.lua`
+  from the repository root after every change (see `docs/DEVELOPMENT.md`).
 - The previous, deprecated addon is https://github.com/retRodya/ret_Cinemator.
   Mine it for knowledge (API quirks, past bugs), not for code.
 - `CHANGELOG.md` — user-visible changes, Keep a Changelog format.
